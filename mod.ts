@@ -198,6 +198,9 @@ export class Base64Encoder {
  * Transform from Base64 encoded bytes stream to bytes stream.
  */
 export class Base64DecoderStream extends TransformStream<Uint8Array, Uint8Array> {
+	get [Symbol.toStringTag](): string {
+		return "Base64DecoderStream";
+	}
 	/**
 	 * Initialize.
 	 * @param {Base64DecodeOptions} [options={}] Base64 decode options.
