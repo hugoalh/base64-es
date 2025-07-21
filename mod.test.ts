@@ -2,70 +2,173 @@ import { deepStrictEqual } from "node:assert";
 import {
 	Base64Decoder,
 	Base64Encoder,
-	Base64EncoderStream
+	Base64EncoderStream,
+	type Base64Variant
 } from "./mod.ts";
-Deno.test("Text Standard 1", { permissions: "none" }, () => {
-	const sampleText = "Many hands make light work.";
-	const sampleEncoded = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu";
-	deepStrictEqual(new Base64Encoder().encodeToText(sampleText), sampleEncoded);
-	deepStrictEqual(new Base64Decoder().decodeToText(sampleEncoded), sampleText);
+async function testerDirect(t: Deno.TestContext, decoded: string | Uint8Array, expects: Partial<Record<Base64Variant, string>>): Promise<void> {
+	for (const [variant, encoded] of Object.entries(expects)) {
+		await t.step(`${variant} Encode`, () => {
+			deepStrictEqual(new Base64Encoder({
+				padding: (
+					variant === "rfc4648-5" ||
+					variant === "url"
+				) ? false : null,
+				variant: variant as Base64Variant,
+			}).encodeToText(decoded), encoded);
+		});
+		await t.step(`${variant} Decode`, () => {
+			deepStrictEqual(new Base64Decoder({ variant: variant as Base64Variant }).decodeToText(encoded), (typeof decoded === "string") ? decoded : new TextDecoder().decode(decoded));
+		});
+	}
+}
+Deno.test("Direct 1", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "Many hands make light work.", {
+		standard: "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu"
+	});
 });
-Deno.test("Text Standard 2", { permissions: "none" }, () => {
-	const sampleText = "light work.";
-	const sampleEncoded = "bGlnaHQgd29yay4=";
-	const sampleEncodedNoPadding = "bGlnaHQgd29yay4";
-	deepStrictEqual(new Base64Encoder().encodeToText(sampleText), sampleEncoded);
-	deepStrictEqual(new Base64Decoder().decodeToText(sampleEncoded), sampleText);
-	deepStrictEqual(new Base64Encoder({ padding: false }).encodeToText(sampleText), sampleEncodedNoPadding);
-	deepStrictEqual(new Base64Decoder().decodeToText(sampleEncodedNoPadding), sampleText);
+Deno.test("Direct 2", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "light work.", {
+		standard: "bGlnaHQgd29yay4=",
+		url: "bGlnaHQgd29yay4"
+	});
 });
-Deno.test("Text Standard 3", { permissions: "none" }, () => {
-	const sampleText = "light work";
-	const sampleEncoded = "bGlnaHQgd29yaw==";
-	const sampleEncodedNoPadding = "bGlnaHQgd29yaw";
-	deepStrictEqual(new Base64Encoder().encodeToText(sampleText), sampleEncoded);
-	deepStrictEqual(new Base64Decoder().decodeToText(sampleEncoded), sampleText);
-	deepStrictEqual(new Base64Encoder({ padding: false }).encodeToText(sampleText), sampleEncodedNoPadding);
-	deepStrictEqual(new Base64Decoder().decodeToText(sampleEncodedNoPadding), sampleText);
+Deno.test("Direct 3", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "light work", {
+		standard: "bGlnaHQgd29yaw==",
+		url: "bGlnaHQgd29yaw"
+	});
 });
-Deno.test("Text Standard 4", { permissions: "none" }, () => {
-	const sampleText = "light wor";
-	const sampleEncoded = "bGlnaHQgd29y";
-	deepStrictEqual(new Base64Encoder().encodeToText(sampleText), sampleEncoded);
-	deepStrictEqual(new Base64Decoder().decodeToText(sampleEncoded), sampleText);
+Deno.test("Direct 4", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "light wor", {
+		standard: "bGlnaHQgd29y"
+	});
 });
-Deno.test("Text Standard 5", { permissions: "none" }, () => {
-	const sampleText = "light wo";
-	const sampleEncoded = "bGlnaHQgd28=";
-	const sampleEncodedNoPadding = "bGlnaHQgd28";
-	deepStrictEqual(new Base64Encoder().encodeToText(sampleText), sampleEncoded);
-	deepStrictEqual(new Base64Decoder().decodeToText(sampleEncoded), sampleText);
-	deepStrictEqual(new Base64Encoder({ padding: false }).encodeToText(sampleText), sampleEncodedNoPadding);
-	deepStrictEqual(new Base64Decoder().decodeToText(sampleEncodedNoPadding), sampleText);
+Deno.test("Direct 5", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "light wo", {
+		standard: "bGlnaHQgd28=",
+		url: "bGlnaHQgd28"
+	});
 });
-Deno.test("Text Standard 6", { permissions: "none" }, () => {
-	const sampleText = "light w";
-	const sampleEncoded = "bGlnaHQgdw==";
-	const sampleEncodedNoPadding = "bGlnaHQgdw";
-	deepStrictEqual(new Base64Encoder().encodeToText(sampleText), sampleEncoded);
-	deepStrictEqual(new Base64Decoder().decodeToText(sampleEncoded), sampleText);
-	deepStrictEqual(new Base64Encoder({ padding: false }).encodeToText(sampleText), sampleEncodedNoPadding);
-	deepStrictEqual(new Base64Decoder().decodeToText(sampleEncodedNoPadding), sampleText);
+Deno.test("Direct 6", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "light w", {
+		standard: "bGlnaHQgdw==",
+		url: "bGlnaHQgdw"
+	});
 });
-Deno.test("Text Standard 7", { permissions: "none" }, () => {
-	const sampleText = "a";
-	const sampleEncoded = "YQ==";
-	const sampleEncodedNoPadding = "YQ";
-	deepStrictEqual(new Base64Encoder().encodeToText(sampleText), sampleEncoded);
-	deepStrictEqual(new Base64Decoder().decodeToText(sampleEncoded), sampleText);
-	deepStrictEqual(new Base64Encoder({ padding: false }).encodeToText(sampleText), sampleEncodedNoPadding);
-	deepStrictEqual(new Base64Decoder().decodeToText(sampleEncodedNoPadding), sampleText);
+Deno.test("Direct 7", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "a", {
+		standard: "YQ==",
+		url: "YQ"
+	});
 });
-Deno.test("Text Standard 8", { permissions: "none" }, () => {
-	const sampleText = "a Ā 𐀀 文 🦄";
-	const sampleEncoded = "YSDEgCDwkICAIOaWhyDwn6aE";
-	deepStrictEqual(new Base64Encoder().encodeToText(sampleText), sampleEncoded);
-	deepStrictEqual(new Base64Decoder().decodeToText(sampleEncoded), sampleText);
+Deno.test("Direct 8", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "a Ā 𐀀 文 🦄", {
+		standard: "YSDEgCDwkICAIOaWhyDwn6aE"
+	});
+});
+Deno.test("Direct 9", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "", {
+		standard: ""
+	});
+});
+Deno.test("Direct 10", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "ß", {
+		standard: "w58=",
+		url: "w58"
+	});
+});
+Deno.test("Direct 11", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "f", {
+		standard: "Zg==",
+		url: "Zg"
+	});
+});
+Deno.test("Direct 12", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "fo", {
+		standard: "Zm8=",
+		url: "Zm8"
+	});
+});
+Deno.test("Direct 13", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "foo", {
+		standard: "Zm9v"
+	});
+});
+Deno.test("Direct 14", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "foob", {
+		standard: "Zm9vYg==",
+		url: "Zm9vYg"
+	});
+});
+Deno.test("Direct 15", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "fooba", {
+		standard: "Zm9vYmE=",
+		url: "Zm9vYmE"
+	});
+});
+Deno.test("Direct 16", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "foobar", {
+		standard: "Zm9vYmFy"
+	});
+});
+Deno.test("Direct 17", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "A", {
+		standard: "QQ==",
+		url: "QQ"
+	});
+});
+Deno.test("Direct 18", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "AA", {
+		standard: "QUE=",
+		url: "QUE"
+	});
+});
+Deno.test("Direct 19", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "AAA", {
+		standard: "QUFB",
+		url: "QUFB"
+	});
+});
+Deno.test("Direct 20", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "AAAA", {
+		standard: "QUFBQQ==",
+		url: "QUFBQQ"
+	});
+});
+Deno.test("Direct 21", { permissions: "none" }, async (t) => {
+	await testerDirect(t, new Uint8Array(0).fill(255), {
+		standard: "",
+		url: ""
+	});
+});
+Deno.test("Direct 22", { permissions: "none" }, async (t) => {
+	await testerDirect(t, new Uint8Array(1).fill(255), {
+		standard: "/w==",
+		url: "_w"
+	});
+});
+Deno.test("Direct 23", { permissions: "none" }, async (t) => {
+	await testerDirect(t, new Uint8Array(2).fill(255), {
+		standard: "//8=",
+		url: "__8"
+	});
+});
+Deno.test("Direct 24", { permissions: "none" }, async (t) => {
+	await testerDirect(t, new Uint8Array(3).fill(255), {
+		standard: "////",
+		url: "____"
+	});
+});
+Deno.test("Direct 25", { permissions: "none" }, async (t) => {
+	await testerDirect(t, new Uint8Array(4).fill(255), {
+		standard: "/////w==",
+		url: "_____w"
+	});
+});
+Deno.test("Direct 26", { permissions: "none" }, async (t) => {
+	await testerDirect(t, ">?>d?ß", {
+		url: "Pj8-ZD_Dnw"
+	});
 });
 Deno.test("Stream 1", {
 	permissions: {
