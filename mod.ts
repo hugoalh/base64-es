@@ -60,7 +60,7 @@ export interface Base64DecodeOptions extends Base64BasicOptions {
  */
 export interface Base64EncodeOptions extends Base64BasicOptions {
 	/**
-	 * Whether to have padding (`=`).
+	 * Whether allow to have padding (`=`).
 	 * 
 	 * When this property is not defined as type of boolean, padding will according to the specification of the defined {@linkcode variant}.
 	 * @default {null}
