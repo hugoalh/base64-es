@@ -11,7 +11,7 @@ An ECMAScript (JavaScript & TypeScript) module for Base64 encode and decode.
 ## 🌟 Features
 
 - Support encode and decode in stream.
-- Support these variants (except its separation and checksum):
+- Support these variants alphabet and padding:
   - [RFC 1421](https://datatracker.ietf.org/doc/html/rfc1421): Base64 for privacy enhanced mail (Deprecated)
   - [RFC 2045](https://datatracker.ietf.org/doc/html/rfc2045): Base64 transfer encoding for MIME
   - [RFC 2152](https://datatracker.ietf.org/doc/html/rfc2152): Base64 for UTF-7

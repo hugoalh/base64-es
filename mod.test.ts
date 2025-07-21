@@ -72,9 +72,10 @@ Deno.test("Stream 1", {
 		read: true
 	}
 }, async () => {
-	const sampleText = await Deno.readTextFile("./README.md");
+	const sampleFilePath = "./README.md";
+	const sampleText = await Deno.readTextFile(sampleFilePath);
 	const encodedDirect = new Base64Encoder().encodeToText(sampleText);
-	await using file = await Deno.open("./README.md");
+	await using file = await Deno.open(sampleFilePath);
 	const encodedStream = (await Array.fromAsync(file.readable.pipeThrough(new Base64EncoderStream()).pipeThrough(new TextDecoderStream()).values())).join("");
 	deepStrictEqual(encodedDirect, encodedStream);
 });
