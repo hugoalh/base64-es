@@ -124,6 +124,9 @@ export class Base64Decoder {
 		return new TextDecoder().decode(this.decodeToBytes(item));
 	}
 }
+/**
+ * Base64 encoder.
+ */
 export class Base64Encoder {
 	get [Symbol.toStringTag](): string {
 		return "Base64Encoder";
