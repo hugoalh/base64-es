@@ -74,8 +74,6 @@ export class Base64Decoder {
 	get [Symbol.toStringTag](): string {
 		return "Base64Decoder";
 	}
-	#replace62: string | null;
-	#replace63: string | null;
 	#variant: Base64Variant;
 	/**
 	 * Initialize.
@@ -83,12 +81,9 @@ export class Base64Decoder {
 	 */
 	constructor(options: Base64DecodeOptions = {}) {
 		const { variant = "standard" }: Base64DecodeOptions = options;
-		const specification: Base64Specification | undefined = specifications[variant];
-		if (typeof specification === "undefined") {
+		if (typeof specifications[variant] === "undefined") {
 			throw new RangeError(`\`${variant}\` is not a valid Base64 variant type! Only accept these values: ${Object.keys(specifications).sort().join(", ")}`);
 		}
-		this.#replace62 = specification.replace62 ?? null;
-		this.#replace63 = specification.replace63 ?? null;
 		this.#variant = variant;
 	}
 	/**
@@ -104,12 +99,16 @@ export class Base64Decoder {
 	 * @returns {Uint8Array} A decoded bytes.
 	 */
 	decodeToBytes(item: string | Uint8Array): Uint8Array {
+		const {
+			replace62 = null,
+			replace63 = null
+		}: Base64Specification = specifications[this.#variant];
 		let itemFmt: string = (typeof item === "string") ? item : new TextDecoder().decode(item);
-		if (this.#replace62 !== null) {
-			itemFmt = itemFmt.replaceAll(this.#replace62, "+");
+		if (replace62 !== null) {
+			itemFmt = itemFmt.replaceAll(replace62, "+");
 		}
-		if (this.#replace63 !== null) {
-			itemFmt = itemFmt.replaceAll(this.#replace63, "/");
+		if (replace63 !== null) {
+			itemFmt = itemFmt.replaceAll(replace63, "/");
 		}
 		return Uint8Array.from(atob(itemFmt).split(""), (character: string): number => {
 			return character.codePointAt(0)!;
@@ -132,8 +131,6 @@ export class Base64Encoder {
 		return "Base64Encoder";
 	}
 	#padding: boolean;
-	#replace62: string | null;
-	#replace63: string | null;
 	#variant: Base64Variant;
 	/**
 	 * Initialize.
@@ -149,8 +146,6 @@ export class Base64Encoder {
 			throw new RangeError(`\`${variant}\` is not a valid Base64 variant type! Only accept these values: ${Object.keys(specifications).sort().join(", ")}`);
 		}
 		this.#padding = (padding === null) ? (specification.padding ?? true) : padding;
-		this.#replace62 = specification.replace62 ?? null;
-		this.#replace63 = specification.replace63 ?? null;
 		this.#variant = variant;
 	}
 	/**
@@ -181,15 +176,19 @@ export class Base64Encoder {
 	 * @returns {string} A Base64 encoded text.
 	 */
 	encodeToText(item: string | Uint8Array): string {
+		const {
+			replace62 = null,
+			replace63 = null
+		}: Base64Specification = specifications[this.#variant];
 		const itemFmt: Uint8Array = (typeof item === "string") ? new TextEncoder().encode(item) : item;
 		let result: string = btoa(Array.from(itemFmt, (byte: number): string => {
 			return String.fromCodePoint(byte);
 		}).join(""));
-		if (this.#replace62 !== null) {
-			result = result.replaceAll("+", this.#replace62);
+		if (replace62 !== null) {
+			result = result.replaceAll("+", replace62);
 		}
-		if (this.#replace63 !== null) {
-			result = result.replaceAll("/", this.#replace63);
+		if (replace63 !== null) {
+			result = result.replaceAll("/", replace63);
 		}
 		return (this.#padding ? result : result.replaceAll("=", ""));
 	}
