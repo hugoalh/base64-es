@@ -200,32 +200,35 @@ export class Base64DecoderStream extends TransformStream<Uint8Array, Uint8Array>
 	get [Symbol.toStringTag](): string {
 		return "Base64DecoderStream";
 	}
+	#base64Decoder: Base64Decoder;
+	#bin: number[] = [];
 	/**
 	 * Initialize.
 	 * @param {Base64DecodeOptions} [options={}] Base64 decode options.
 	 */
 	constructor(options?: Base64DecodeOptions) {
-		const base64Decoder: Base64Decoder = new Base64Decoder(options);
-		const bin: number[] = [];
-		super({
-			transform(chunkStream: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void {
-				bin.push(...Array.from(chunkStream));
-				if (bin.length >= 4) {
-					try {
-						controller.enqueue(base64Decoder.decodeToBytes(Uint8Array.from(bin.splice(0, Math.floor(bin.length / 4) * 4))));
-					} catch (error) {
-						controller.error(error);
-					}
-				}
-			},
-			flush(controller: TransformStreamDefaultController<Uint8Array>): void {
+		const transform: TransformerTransformCallback<Uint8Array, Uint8Array> = (chunkStream: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
+			this.#bin.push(...Array.from(chunkStream));
+			if (this.#bin.length >= 4) {
 				try {
-					controller.enqueue(base64Decoder.decodeToBytes(Uint8Array.from(bin.splice(0, bin.length))));
+					controller.enqueue(this.#base64Decoder.decodeToBytes(Uint8Array.from(this.#bin.splice(0, Math.floor(this.#bin.length / 4) * 4))));
 				} catch (error) {
 					controller.error(error);
 				}
 			}
+		};
+		const flush: TransformerFlushCallback<Uint8Array> = (controller: TransformStreamDefaultController<Uint8Array>): void => {
+			try {
+				controller.enqueue(this.#base64Decoder.decodeToBytes(Uint8Array.from(this.#bin.splice(0, this.#bin.length))));
+			} catch (error) {
+				controller.error(error);
+			}
+		};
+		super({
+			transform,
+			flush
 		});
+		this.#base64Decoder = new Base64Decoder(options);
 	}
 }
 /**
@@ -235,35 +238,39 @@ export class Base64EncoderStream extends TransformStream<Uint8Array, Uint8Array>
 	get [Symbol.toStringTag](): string {
 		return "Base64EncoderStream";
 	}
+	#base64Encoder: Base64Encoder;
+	#base64EncoderForceNoPadding: Base64Encoder;
+	#bin: number[] = [];
 	/**
 	 * Initialize.
 	 * @param {Base64EncodeOptions} [options={}] Base64 encode options.
 	 */
 	constructor(options: Base64EncodeOptions = {}) {
-		const base64EncoderForceNoPadding: Base64Encoder = new Base64Encoder({
-			...options,
-			padding: false
-		});
-		const base64Encoder: Base64Encoder = new Base64Encoder(options);
-		const bin: number[] = [];
-		super({
-			transform(chunkStream: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void {
-				bin.push(...Array.from(chunkStream));
-				if (bin.length >= 3) {
-					try {
-						controller.enqueue(base64EncoderForceNoPadding.encodeToBytes(Uint8Array.from(bin.splice(0, Math.floor(bin.length / 3) * 3))));
-					} catch (error) {
-						controller.error(error);
-					}
-				}
-			},
-			flush(controller: TransformStreamDefaultController<Uint8Array>): void {
+		const transform: TransformerTransformCallback<Uint8Array, Uint8Array> = (chunkStream: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
+			this.#bin.push(...Array.from(chunkStream));
+			if (this.#bin.length >= 3) {
 				try {
-					controller.enqueue(base64Encoder.encodeToBytes(Uint8Array.from(bin.splice(0, bin.length))));
+					controller.enqueue(this.#base64EncoderForceNoPadding.encodeToBytes(Uint8Array.from(this.#bin.splice(0, Math.floor(this.#bin.length / 3) * 3))));
 				} catch (error) {
 					controller.error(error);
 				}
 			}
+		};
+		const flush: TransformerFlushCallback<Uint8Array> = (controller: TransformStreamDefaultController<Uint8Array>): void => {
+			try {
+				controller.enqueue(this.#base64Encoder.encodeToBytes(Uint8Array.from(this.#bin.splice(0, this.#bin.length))));
+			} catch (error) {
+				controller.error(error);
+			}
+		};
+		super({
+			transform,
+			flush
 		});
+		this.#base64EncoderForceNoPadding = new Base64Encoder({
+			...options,
+			padding: false
+		});
+		this.#base64Encoder = new Base64Encoder(options);
 	}
 }
