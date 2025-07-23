@@ -170,6 +170,29 @@ Deno.test("Direct 26", { permissions: "none" }, async (t) => {
 		url: "Pj8-ZD_Dnw"
 	});
 });
+Deno.test("Direct 27", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "Hello world!", {
+		standard: "SGVsbG8gd29ybGQh"
+	});
+});
+Deno.test("Direct 28", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "ice creams", {
+		standard: "aWNlIGNyZWFtcw==",
+		url: "aWNlIGNyZWFtcw"
+	});
+});
+Deno.test("Direct 29", { permissions: "none" }, async (t) => {
+	await testerDirect(t, "subjects?", {
+		standard: "c3ViamVjdHM/",
+		url: "c3ViamVjdHM_"
+	});
+});
+Deno.test("Direct 30", { permissions: "none" }, async (t) => {
+	await testerDirect(t, Uint8Array.from([0xDE, 0xAD, 0xBE, 0xEF]), {
+		standard: "3q2+7w==",
+		url: "3q2-7w"
+	});
+});
 Deno.test("Stream 1", {
 	permissions: {
 		read: true
