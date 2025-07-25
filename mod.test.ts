@@ -1,6 +1,7 @@
 import { deepStrictEqual } from "node:assert";
 import {
 	Base64Decoder,
+	Base64DecoderStream,
 	Base64Encoder,
 	Base64EncoderStream,
 	type Base64Variant
@@ -193,15 +194,44 @@ Deno.test("Direct 30", { permissions: "none" }, async (t) => {
 		url: "3q2-7w"
 	});
 });
+async function testerStream(t: Deno.TestContext, filePath: string): Promise<void> {
+	const sampleText = await Deno.readTextFile(filePath);
+	const encodedDirect = new Base64Encoder().encodeToText(sampleText);
+	await using sampleFile = await Deno.open(filePath);
+	const encodedStream = sampleFile.readable.pipeThrough(new Base64EncoderStream());
+	const encodedStreamTee=encodedStream.tee()
+	const encodedStreamVisual = (await Array.fromAsync(encodedStreamTee[0].pipeThrough(new TextDecoderStream()).values())).join("");
+	await t.step("Encode", () => {
+		deepStrictEqual(encodedDirect, encodedStreamVisual);
+	});
+	const decodedDirect = new Base64Decoder().decodeToText(encodedDirect);
+	await t.step("Decode Direct", () => {
+		deepStrictEqual(sampleText, decodedDirect);
+	});
+	const decodedStream = encodedStreamTee[1].pipeThrough(new Base64DecoderStream());
+	const decodedStreamVisual = (await Array.fromAsync(decodedStream.pipeThrough(new TextDecoderStream()).values())).join("");
+	await t.step("Decode Stream", () => {
+		deepStrictEqual(sampleText, decodedStreamVisual);
+	});
+}
 Deno.test("Stream 1", {
 	permissions: {
 		read: true
 	}
-}, async () => {
-	const sampleFilePath = "./README.md";
-	const sampleText = await Deno.readTextFile(sampleFilePath);
-	const encodedDirect = new Base64Encoder().encodeToText(sampleText);
-	await using file = await Deno.open(sampleFilePath);
-	const encodedStream = (await Array.fromAsync(file.readable.pipeThrough(new Base64EncoderStream()).pipeThrough(new TextDecoderStream()).values())).join("");
-	deepStrictEqual(encodedDirect, encodedStream);
+}, async (t) => {
+	await testerStream(t, "./LICENSE.md");
+});
+Deno.test("Stream 2", {
+	permissions: {
+		read: true
+	}
+}, async (t) => {
+	await testerStream(t, "./README.md");
+});
+Deno.test("Stream 3", {
+	permissions: {
+		read: true
+	}
+}, async (t) => {
+	await testerStream(t, "./deno.jsonc");
 });

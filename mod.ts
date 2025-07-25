@@ -207,26 +207,24 @@ export class Base64DecoderStream extends TransformStream<Uint8Array, Uint8Array>
 	 * @param {Base64DecodeOptions} [options={}] Base64 decode options.
 	 */
 	constructor(options?: Base64DecodeOptions) {
-		const transform: TransformerTransformCallback<Uint8Array, Uint8Array> = (chunkStream: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
-			this.#bin.push(...Array.from(chunkStream));
-			if (this.#bin.length >= 4) {
+		super({
+			transform: (chunkStream: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
+				this.#bin.push(...Array.from(chunkStream));
+				if (this.#bin.length >= 4) {
+					try {
+						controller.enqueue(this.#base64Decoder.decodeToBytes(Uint8Array.from(this.#bin.splice(0, Math.floor(this.#bin.length / 4) * 4))));
+					} catch (error) {
+						controller.error(error);
+					}
+				}
+			},
+			flush: (controller: TransformStreamDefaultController<Uint8Array>): void => {
 				try {
-					controller.enqueue(this.#base64Decoder.decodeToBytes(Uint8Array.from(this.#bin.splice(0, Math.floor(this.#bin.length / 4) * 4))));
+					controller.enqueue(this.#base64Decoder.decodeToBytes(Uint8Array.from(this.#bin.splice(0, this.#bin.length))));
 				} catch (error) {
 					controller.error(error);
 				}
 			}
-		};
-		const flush: TransformerFlushCallback<Uint8Array> = (controller: TransformStreamDefaultController<Uint8Array>): void => {
-			try {
-				controller.enqueue(this.#base64Decoder.decodeToBytes(Uint8Array.from(this.#bin.splice(0, this.#bin.length))));
-			} catch (error) {
-				controller.error(error);
-			}
-		};
-		super({
-			transform,
-			flush
 		});
 		this.#base64Decoder = new Base64Decoder(options);
 	}
@@ -246,26 +244,24 @@ export class Base64EncoderStream extends TransformStream<Uint8Array, Uint8Array>
 	 * @param {Base64EncodeOptions} [options={}] Base64 encode options.
 	 */
 	constructor(options: Base64EncodeOptions = {}) {
-		const transform: TransformerTransformCallback<Uint8Array, Uint8Array> = (chunkStream: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
-			this.#bin.push(...Array.from(chunkStream));
-			if (this.#bin.length >= 3) {
+		super({
+			transform: (chunkStream: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
+				this.#bin.push(...Array.from(chunkStream));
+				if (this.#bin.length >= 3) {
+					try {
+						controller.enqueue(this.#base64EncoderForceNoPadding.encodeToBytes(Uint8Array.from(this.#bin.splice(0, Math.floor(this.#bin.length / 3) * 3))));
+					} catch (error) {
+						controller.error(error);
+					}
+				}
+			},
+			flush: (controller: TransformStreamDefaultController<Uint8Array>): void => {
 				try {
-					controller.enqueue(this.#base64EncoderForceNoPadding.encodeToBytes(Uint8Array.from(this.#bin.splice(0, Math.floor(this.#bin.length / 3) * 3))));
+					controller.enqueue(this.#base64Encoder.encodeToBytes(Uint8Array.from(this.#bin.splice(0, this.#bin.length))));
 				} catch (error) {
 					controller.error(error);
 				}
 			}
-		};
-		const flush: TransformerFlushCallback<Uint8Array> = (controller: TransformStreamDefaultController<Uint8Array>): void => {
-			try {
-				controller.enqueue(this.#base64Encoder.encodeToBytes(Uint8Array.from(this.#bin.splice(0, this.#bin.length))));
-			} catch (error) {
-				controller.error(error);
-			}
-		};
-		super({
-			transform,
-			flush
 		});
 		this.#base64EncoderForceNoPadding = new Base64Encoder({
 			...options,
