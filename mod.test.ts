@@ -199,7 +199,7 @@ async function testerStream(t: Deno.TestContext, filePath: string): Promise<void
 	const encodedDirect = new Base64Encoder().encodeToText(sampleText);
 	await using sampleFile = await Deno.open(filePath);
 	const encodedStream = sampleFile.readable.pipeThrough(new Base64EncoderStream());
-	const encodedStreamTee=encodedStream.tee()
+	const encodedStreamTee = encodedStream.tee();
 	const encodedStreamVisual = (await Array.fromAsync(encodedStreamTee[0].pipeThrough(new TextDecoderStream()).values())).join("");
 	await t.step("Encode", () => {
 		deepStrictEqual(encodedDirect, encodedStreamVisual);
