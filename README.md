@@ -66,7 +66,7 @@ An ECMAScript (JavaScript & TypeScript) module for Base64 encode and decode.
 ## 🧩 APIs
 
 - ```ts
-   class Base64Decoder {
+  class Base64Decoder {
     constructor(options?: Base64DecodeOptions);
     get variant(): Base64Variant;
     decodeToBytes(item: string | Uint8Array): Uint8Array;
@@ -74,7 +74,7 @@ An ECMAScript (JavaScript & TypeScript) module for Base64 encode and decode.
   }
   ```
 - ```ts
-   class Base64Encoder {
+  class Base64Encoder {
     constructor(options?: Base64EncodeOptions);
     get padding(): boolean;
     get variant(): Base64Variant;
@@ -83,12 +83,12 @@ An ECMAScript (JavaScript & TypeScript) module for Base64 encode and decode.
   }
   ```
 - ```ts
-   class Base64DecoderStream extends TransformStream<Uint8Array, Uint8Array> {
+  class Base64DecoderStream extends TransformStream<Uint8Array, Uint8Array> {
     constructor(options?: Base64DecodeOptions);
   }
   ```
 - ```ts
-   class Base64EncoderStream extends TransformStream<Uint8Array, Uint8Array> {
+  class Base64EncoderStream extends TransformStream<Uint8Array, Uint8Array> {
     constructor(options?: Base64EncodeOptions);
   }
   ```
