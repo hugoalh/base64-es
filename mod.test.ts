@@ -14,7 +14,7 @@ async function testerDirect(t: Deno.TestContext, decoded: string | Uint8Array, e
 					variant === "rfc4648-5" ||
 					variant === "url"
 				) ? false : null,
-				variant: variant as Base64Variant,
+				variant: variant as Base64Variant
 			}).encodeToText(decoded), encoded);
 		});
 		await t.step(`${variant} Decode`, () => {
