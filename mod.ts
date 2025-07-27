@@ -208,8 +208,8 @@ export class Base64DecoderStream extends TransformStream<Uint8Array, Uint8Array>
 	 */
 	constructor(options?: Base64DecodeOptions) {
 		super({
-			transform: (chunkStream: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
-				this.#bin.push(...Array.from(chunkStream));
+			transform: (chunk: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
+				this.#bin.push(...Array.from(chunk));
 				if (this.#bin.length >= 4) {
 					try {
 						controller.enqueue(this.#base64Decoder.decodeToBytes(Uint8Array.from(this.#bin.splice(0, Math.floor(this.#bin.length / 4) * 4))));
@@ -237,7 +237,6 @@ export class Base64EncoderStream extends TransformStream<Uint8Array, Uint8Array>
 		return "Base64EncoderStream";
 	}
 	#base64Encoder: Base64Encoder;
-	#base64EncoderForceNoPadding: Base64Encoder;
 	#bin: number[] = [];
 	/**
 	 * Initialize.
@@ -245,11 +244,11 @@ export class Base64EncoderStream extends TransformStream<Uint8Array, Uint8Array>
 	 */
 	constructor(options: Base64EncodeOptions = {}) {
 		super({
-			transform: (chunkStream: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
-				this.#bin.push(...Array.from(chunkStream));
+			transform: (chunk: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
+				this.#bin.push(...Array.from(chunk));
 				if (this.#bin.length >= 3) {
 					try {
-						controller.enqueue(this.#base64EncoderForceNoPadding.encodeToBytes(Uint8Array.from(this.#bin.splice(0, Math.floor(this.#bin.length / 3) * 3))));
+						controller.enqueue(this.#base64Encoder.encodeToBytes(Uint8Array.from(this.#bin.splice(0, Math.floor(this.#bin.length / 3) * 3))));
 					} catch (error) {
 						controller.error(error);
 					}
@@ -262,10 +261,6 @@ export class Base64EncoderStream extends TransformStream<Uint8Array, Uint8Array>
 					controller.error(error);
 				}
 			}
-		});
-		this.#base64EncoderForceNoPadding = new Base64Encoder({
-			...options,
-			padding: false
 		});
 		this.#base64Encoder = new Base64Encoder(options);
 	}
