@@ -68,6 +68,18 @@ export interface Base64EncodeOptions extends Base64BasicOptions {
 	padding?: boolean | null;
 }
 /**
+ * Base64 transform-code options.
+ */
+export interface Base64TransformCodeOptions extends Partial<QueuingStrategyInit> {
+	/**
+	 * Expect number of bytes per chunk.
+	 * 
+	 * Base64 stream encode and decode always require conditional chuck size, the actual number of bytes per chunk maybe higher or lower than expected.
+	 * @default {1024}
+	 */
+	highWaterMark?: number;
+}
+/**
  * Base64 decoder.
  */
 export class Base64Decoder {
@@ -193,6 +205,13 @@ export class Base64Encoder {
 		return (this.#padding ? result : result.replaceAll("=", ""));
 	}
 }
+function resolveOptionHighWaterMark(multiplier: number, options: Base64TransformCodeOptions): number {
+	const expect: number = options.highWaterMark ?? 1024;
+	if (!(Number.isSafeInteger(expect) && expect > 0)) {
+		throw new TypeError(`Parameter \`options.highWaterMark\` is not a number which is integer, safe, and > 0!`);
+	}
+	return Math.max(multiplier, Math.round(expect / multiplier) * multiplier);
+}
 /**
  * Transform from Base64 encoded bytes stream to bytes stream.
  */
@@ -201,31 +220,24 @@ export class Base64DecoderStream extends TransformStream<Uint8Array, Uint8Array>
 		return "Base64DecoderStream";
 	}
 	#base64Decoder: Base64Decoder;
-	#bin: number[] = [];
 	/**
 	 * Initialize.
-	 * @param {Base64DecodeOptions} [options={}] Base64 decode options.
+	 * @param {Base64DecodeOptions & Base64TransformCodeOptions} [options={}] Base64 stream decode options.
 	 */
-	constructor(options?: Base64DecodeOptions) {
-		super({
-			transform: (chunkStream: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
-				this.#bin.push(...Array.from(chunkStream));
-				if (this.#bin.length >= 4) {
+	constructor(options: Base64DecodeOptions & Base64TransformCodeOptions = {}) {
+		super(
+			{
+				transform: (chunk: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
 					try {
-						controller.enqueue(this.#base64Decoder.decodeToBytes(Uint8Array.from(this.#bin.splice(0, Math.floor(this.#bin.length / 4) * 4))));
+						controller.enqueue(this.#base64Decoder.decodeToBytes(chunk));
 					} catch (error) {
 						controller.error(error);
 					}
 				}
 			},
-			flush: (controller: TransformStreamDefaultController<Uint8Array>): void => {
-				try {
-					controller.enqueue(this.#base64Decoder.decodeToBytes(Uint8Array.from(this.#bin.splice(0, this.#bin.length))));
-				} catch (error) {
-					controller.error(error);
-				}
-			}
-		});
+			undefined,
+			new ByteLengthQueuingStrategy({ highWaterMark: resolveOptionHighWaterMark(4, options) })
+		);
 		this.#base64Decoder = new Base64Decoder(options);
 	}
 }
@@ -237,36 +249,24 @@ export class Base64EncoderStream extends TransformStream<Uint8Array, Uint8Array>
 		return "Base64EncoderStream";
 	}
 	#base64Encoder: Base64Encoder;
-	#base64EncoderForceNoPadding: Base64Encoder;
-	#bin: number[] = [];
 	/**
 	 * Initialize.
-	 * @param {Base64EncodeOptions} [options={}] Base64 encode options.
+	 * @param {Base64EncodeOptions & Base64TransformCodeOptions} [options={}] Base64 stream encode options.
 	 */
-	constructor(options: Base64EncodeOptions = {}) {
-		super({
-			transform: (chunkStream: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
-				this.#bin.push(...Array.from(chunkStream));
-				if (this.#bin.length >= 3) {
+	constructor(options: Base64EncodeOptions & Base64TransformCodeOptions = {}) {
+		super(
+			{
+				transform: (chunk: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
 					try {
-						controller.enqueue(this.#base64EncoderForceNoPadding.encodeToBytes(Uint8Array.from(this.#bin.splice(0, Math.floor(this.#bin.length / 3) * 3))));
+						controller.enqueue(this.#base64Encoder.encodeToBytes(Uint8Array.from(chunk)));
 					} catch (error) {
 						controller.error(error);
 					}
 				}
 			},
-			flush: (controller: TransformStreamDefaultController<Uint8Array>): void => {
-				try {
-					controller.enqueue(this.#base64Encoder.encodeToBytes(Uint8Array.from(this.#bin.splice(0, this.#bin.length))));
-				} catch (error) {
-					controller.error(error);
-				}
-			}
-		});
-		this.#base64EncoderForceNoPadding = new Base64Encoder({
-			...options,
-			padding: false
-		});
+			undefined,
+			new ByteLengthQueuingStrategy({ highWaterMark: resolveOptionHighWaterMark(3, options) })
+		);
 		this.#base64Encoder = new Base64Encoder(options);
 	}
 }

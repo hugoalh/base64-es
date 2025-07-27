@@ -84,12 +84,12 @@ An ECMAScript (JavaScript & TypeScript) module for Base64 encode and decode.
   ```
 - ```ts
   class Base64DecoderStream extends TransformStream<Uint8Array, Uint8Array> {
-    constructor(options?: Base64DecodeOptions);
+    constructor(options?: Base64DecodeOptions & Base64TransformCodeOptions);
   }
   ```
 - ```ts
   class Base64EncoderStream extends TransformStream<Uint8Array, Uint8Array> {
-    constructor(options?: Base64EncodeOptions);
+    constructor(options?: Base64EncodeOptions & Base64TransformCodeOptions);
   }
   ```
 - ```ts
@@ -116,6 +116,11 @@ An ECMAScript (JavaScript & TypeScript) module for Base64 encode and decode.
 - ```ts
   interface Base64EncodeOptions extends Base64BasicOptions {
     padding?: boolean | null;
+  }
+  ```
+- ```ts
+  interface Base64TransformCodeOptions extends Partial<QueuingStrategyInit> {
+    highWaterMark?: number;
   }
   ```
 
