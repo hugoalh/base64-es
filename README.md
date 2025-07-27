@@ -11,13 +11,13 @@ An ECMAScript (JavaScript & TypeScript) module for Base64 encode and decode.
 ## 🌟 Features
 
 - Support multiple variants alphabet and padding:
-  - [RFC 1421: Base64 for privacy enhanced mail](https://datatracker.ietf.org/doc/html/rfc1421) (Deprecated)
+  - [RFC 1421: Base64 encoding for privacy enhanced mail](https://datatracker.ietf.org/doc/html/rfc1421) (Deprecated)
   - [RFC 2045: Base64 transfer encoding for MIME](https://datatracker.ietf.org/doc/html/rfc2045)
-  - [RFC 2152: Base64 for UTF-7](https://datatracker.ietf.org/doc/html/rfc2152)
+  - [RFC 2152: Base64 encoding for UTF-7](https://datatracker.ietf.org/doc/html/rfc2152)
   - [RFC 3501: Base64 encoding for IMAP mailbox names](https://datatracker.ietf.org/doc/html/rfc3501#section-5.1.3)
-  - [RFC 4648 §4: Base64](https://datatracker.ietf.org/doc/html/rfc4648#section-4) (Standard)
-  - [RFC 4648 §5: Base64URL](https://datatracker.ietf.org/doc/html/rfc4648#section-5) (URL-safe & filename-safe standard)
-  - [RFC 9580: ASCII armor for OpenPGP](https://datatracker.ietf.org/doc/html/rfc9580)
+  - [RFC 4648 §4: Base64 encoding](https://datatracker.ietf.org/doc/html/rfc4648#section-4) (Standard)
+  - [RFC 4648 §5: Base64 encoding with URL and filename safe alphabet](https://datatracker.ietf.org/doc/html/rfc4648#section-5) (Base64URL)
+  - [RFC 9580: ASCII armor encoding for OpenPGP](https://datatracker.ietf.org/doc/html/rfc9580)
 - Support stream encode and decode.
 
 ## 🔰 Begin
