@@ -2,9 +2,10 @@
 
 [**⚖️** MIT](./LICENSE.md)
 
-[![GitHub: hugoalh/base64-es](https://img.shields.io/github/v/release/hugoalh/base64-es?label=hugoalh/base64-es&labelColor=181717&logo=github&logoColor=ffffff&sort=semver&style=flat "GitHub: hugoalh/base64-es")](https://github.com/hugoalh/base64-es)
-[![JSR: @hugoalh/base64](https://img.shields.io/jsr/v/@hugoalh/base64?label=@hugoalh/base64&labelColor=F7DF1E&logo=jsr&logoColor=000000&style=flat "JSR: @hugoalh/base64")](https://jsr.io/@hugoalh/base64)
-[![NPM: @hugoalh/base64](https://img.shields.io/npm/v/@hugoalh/base64?label=@hugoalh/base64&labelColor=CB3837&logo=npm&logoColor=ffffff&style=flat "NPM: @hugoalh/base64")](https://www.npmjs.com/package/@hugoalh/base64)
+🔗
+[GitHub](https://github.com/hugoalh/base64-es)
+[JSR](https://jsr.io/@hugoalh/base64)
+[NPM](https://www.npmjs.com/package/@hugoalh/base64)
 
 An ECMAScript module for Base64 encode and decode.
 
