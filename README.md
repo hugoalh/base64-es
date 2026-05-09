@@ -4,8 +4,8 @@
 
 🔗
 [GitHub](https://github.com/hugoalh/base64-es)
-[JSR](https://jsr.io/@hugoalh/base64)
-[NPM](https://www.npmjs.com/package/@hugoalh/base64)
+● [JSR](https://jsr.io/@hugoalh/base64)
+● [NPM](https://www.npmjs.com/package/@hugoalh/base64)
 
 An ECMAScript module for Base64 encode and decode.
 
