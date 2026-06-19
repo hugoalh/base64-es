@@ -4,7 +4,8 @@ title: "Base64 (ES)"
 message: "If you use this software, please cite it using the metadata from this file."
 type: "software"
 authors:
-  - name: "hugoalh"
+  - name: "HUGOALH"
+    alias: "hugoalh"
 repository-code: "https://github.com/hugoalh/base64-es"
 keywords:
   - "base64"
