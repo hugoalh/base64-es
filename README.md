@@ -3,7 +3,8 @@
 [**⚖️** MIT](./LICENSE.md)
 
 🔗
-[GitHub](https://github.com/hugoalh/base64-es)
+[DistBoard @hugoalh](https://hugoalh.github.io/distboard/base64_ecmascript)
+● [GitHub](https://github.com/hugoalh/base64-es)
 ● [JSR](https://jsr.io/@hugoalh/base64)
 ● [NPM](https://www.npmjs.com/package/@hugoalh/base64)
 
