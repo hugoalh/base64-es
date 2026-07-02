@@ -1,3 +1,11 @@
+if (typeof Uint8Array.fromBase64 === "undefined") {
+	//deno-lint-ignore hugoalh/no-import-dynamic -- Polyfill.
+	await import("npm:es-arraybuffer-base64@^1.1.2/Uint8Array.fromBase64/auto");
+}
+if (typeof Uint8Array.prototype.toBase64 === "undefined") {
+	//deno-lint-ignore hugoalh/no-import-dynamic -- Polyfill.
+	await import("npm:es-arraybuffer-base64@^1.1.2/Uint8Array.prototype.toBase64/auto");
+}
 /**
  * Variant type of the Base64.
  */
@@ -110,8 +118,9 @@ export class Base64Decoder {
 		if (replace63 !== null) {
 			itemFmt = itemFmt.replaceAll(replace63, "/");
 		}
-		return Uint8Array.from(atob(itemFmt).split(""), (character: string): number => {
-			return character.codePointAt(0)!;
+		return Uint8Array.fromBase64(itemFmt, {
+			alphabet: "base64",
+			lastChunkHandling: "loose"
 		});
 	}
 	/**
@@ -181,9 +190,10 @@ export class Base64Encoder {
 			replace63 = null
 		}: Base64Specification = specifications[this.#variant];
 		const itemFmt: Uint8Array = (typeof item === "string") ? new TextEncoder().encode(item) : item;
-		let result: string = btoa(Array.from(itemFmt, (byte: number): string => {
-			return String.fromCodePoint(byte);
-		}).join(""));
+		let result: string = itemFmt.toBase64({
+			alphabet: "base64",
+			omitPadding: false
+		});
 		if (replace62 !== null) {
 			result = result.replaceAll("+", replace62);
 		}
