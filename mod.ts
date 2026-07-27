@@ -90,7 +90,7 @@ export class Base64Decoder {
 	constructor(options: Base64DecodeOptions = {}) {
 		const { variant = "standard" }: Base64DecodeOptions = options;
 		if (typeof specifications[variant] === "undefined") {
-			throw new RangeError(`\`${variant}\` is not a valid Base64 variant type! Only accept these values: ${Object.keys(specifications).sort().join(", ")}`);
+			throw new RangeError(`\`${variant}\` is not a valid Base64 variant type! Only accept these values: ${Object.keys(specifications).sort().join(", ")}.`);
 		}
 		this.#variant = variant;
 	}
@@ -152,7 +152,7 @@ export class Base64Encoder {
 		}: Base64EncodeOptions = options;
 		const specification: Base64Specification | undefined = specifications[variant];
 		if (typeof specification === "undefined") {
-			throw new RangeError(`\`${variant}\` is not a valid Base64 variant type! Only accept these values: ${Object.keys(specifications).sort().join(", ")}`);
+			throw new RangeError(`\`${variant}\` is not a valid Base64 variant type! Only accept these values: ${Object.keys(specifications).sort().join(", ")}.`);
 		}
 		this.#padding = (padding === null) ? (specification.padding ?? true) : padding;
 		this.#variant = variant;
