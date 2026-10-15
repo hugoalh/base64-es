@@ -82,6 +82,7 @@ export class Base64Decoder {
 	get [Symbol.toStringTag](): string {
 		return "Base64Decoder";
 	}
+	#specification: Base64Specification;
 	#variant: Base64Variant;
 	/**
 	 * Initialize.
@@ -89,9 +90,11 @@ export class Base64Decoder {
 	 */
 	constructor(options: Base64DecodeOptions = {}) {
 		const { variant = "standard" }: Base64DecodeOptions = options;
-		if (typeof specifications[variant] === "undefined") {
+		const specification: Base64Specification | undefined = specifications[variant];
+		if (typeof specification === "undefined") {
 			throw new RangeError(`\`${variant}\` is not a valid Base64 variant type! Only accept these values: ${Object.keys(specifications).sort().join(", ")}.`);
 		}
+		this.#specification = specification;
 		this.#variant = variant;
 	}
 	/**
@@ -110,7 +113,7 @@ export class Base64Decoder {
 		const {
 			replace62 = null,
 			replace63 = null
-		}: Base64Specification = specifications[this.#variant];
+		}: Base64Specification = this.#specification;
 		let itemFmt: string = (typeof item === "string") ? item : new TextDecoder().decode(item);
 		if (replace62 !== null) {
 			itemFmt = itemFmt.replaceAll(replace62, "+");
@@ -140,6 +143,7 @@ export class Base64Encoder {
 		return "Base64Encoder";
 	}
 	#padding: boolean;
+	#specification: Base64Specification;
 	#variant: Base64Variant;
 	/**
 	 * Initialize.
@@ -155,6 +159,7 @@ export class Base64Encoder {
 			throw new RangeError(`\`${variant}\` is not a valid Base64 variant type! Only accept these values: ${Object.keys(specifications).sort().join(", ")}.`);
 		}
 		this.#padding = (padding === null) ? (specification.padding ?? true) : padding;
+		this.#specification = specification;
 		this.#variant = variant;
 	}
 	/**
@@ -188,7 +193,7 @@ export class Base64Encoder {
 		const {
 			replace62 = null,
 			replace63 = null
-		}: Base64Specification = specifications[this.#variant];
+		}: Base64Specification = this.#specification;
 		const itemFmt: Uint8Array = (typeof item === "string") ? new TextEncoder().encode(item) : item;
 		let result: string = itemFmt.toBase64({
 			alphabet: "base64",
@@ -216,7 +221,7 @@ export class Base64DecoderStream extends TransformStream<Uint8Array, Uint8Array>
 	 * Initialize.
 	 * @param {Base64DecodeOptions} [options={}] Base64 decode options.
 	 */
-	constructor(options?: Base64DecodeOptions) {
+	constructor(options: Base64DecodeOptions = {}) {
 		super({
 			transform: (chunk: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
 				this.#bin.push(...Array.from(chunk));
